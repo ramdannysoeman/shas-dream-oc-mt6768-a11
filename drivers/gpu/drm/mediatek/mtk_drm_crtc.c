@@ -3128,6 +3128,19 @@ static void ddp_cmdq_cb(struct cmdq_cb_data data)
 	if (session_id > 0)
 		mtk_crtc_release_input_layer_fence(crtc, session_id);
 
+
+#ifdef MTK_DRM_DELAY_PRESENT_FENCE
+	// release present fence
+	if (drm_crtc_index(crtc) != 2) {
+		struct cmdq_pkt_buffer *cmdq_buf = &(mtk_crtc->gce_obj.buf);
+		unsigned int fence_idx = *(unsigned int *)(cmdq_buf->va_base +
+				DISP_SLOT_PRESENT_FENCE(drm_crtc_index(crtc)));
+
+		mtk_release_present_fence(session_id, fence_idx);
+	}
+#endif
+
+
 	DDP_MUTEX_LOCK(&mtk_crtc->lock, __func__, __LINE__);
 	if (!mtk_crtc_is_dc_mode(crtc) && session_id > 0)
 		mtk_crtc_release_output_buffer_fence(crtc, session_id);

@@ -2288,7 +2288,7 @@ static int ion_debug_heap_show(struct seq_file *s, void *unused)
 				   cam_heap->id, cam_heap->free_list_size);
 	}
 
-	seq_puts(s, "----------------------------------------------------\n");
+
 	seq_printf(s, "%16.s %16zu\n", "num_of_alloc_bytes ",
 		   heap->num_of_alloc_bytes);
 	seq_printf(s, "%16.s %16zu\n", "num_of_buffers ",

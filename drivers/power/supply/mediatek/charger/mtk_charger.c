@@ -799,9 +799,13 @@ int charger_manager_get_ibus(int *ibus)
 	return 0;
 }
 
+
+
+
 int charger_manager_set_input_suspend(int suspend)
 {
 	pr_info("%s suspend: %d.\n", __func__, suspend);
+
 
 	if (pinfo == NULL)
 		return false;

@@ -21,6 +21,8 @@
 
 #include <trace/events/android_fs.h>
 
+#include <trace/events/android_fs.h>
+
 static const struct file_operations fuse_direct_io_file_operations;
 
 static int fuse_send_open(struct fuse_conn *fc, u64 nodeid, struct file *file,

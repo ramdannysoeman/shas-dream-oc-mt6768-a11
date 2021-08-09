@@ -628,6 +628,7 @@ static int battery_set_property(struct power_supply *psy,
 
 	return rc;
 
+
 }
 
 static int battery_prop_is_writeable(struct power_supply *psy,
