@@ -83,11 +83,9 @@ static int debug_procfs_init;
 static const long int DEFAULT_LOG_FPS_WND_SIZE = 30;
 unsigned char pq_debug_flag;
 unsigned char aal_debug_flag;
-
-static unsigned int dbg_log_level = 0;
-static unsigned int irq_log_level = 0;
+static unsigned int dbg_log_level = 3;
+static unsigned int irq_log_level;
 static unsigned int dump_to_buffer;
-
 static int dbg_force_roi;
 static int dbg_partial_x;
 static int dbg_partial_y;
