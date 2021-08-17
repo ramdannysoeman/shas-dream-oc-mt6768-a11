@@ -297,6 +297,22 @@ static int __init devfreq_boost_init(void)
 	struct df_boost_drv *d = &df_boost_drv_g;
 	struct task_struct *thread[DEVFREQ_MAX];
 	int i, ret;
+<<<<<<< HEAD
+=======
+
+	for (i = 0; i < DEVFREQ_MAX; i++) {
+		struct boost_dev *b = d->devices + i;
+
+		thread[i] = kthread_run_perf_critical(cpu_perf_mask, devfreq_boost_thread, b,
+						      "devfreq_boostd/%d", i);
+		if (IS_ERR(thread[i])) {
+			ret = PTR_ERR(thread[i]);
+			pr_err("Failed to create kthread, err: %d\n", ret);
+			goto stop_kthreads;
+		}
+	}
+
+>>>>>>> 4fd48ead78bb... drivers: update
 	devfreq_boost_input_handler.private = d;
 	ret = input_register_handler(&devfreq_boost_input_handler);
 	if (ret) {
