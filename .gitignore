@@ -134,3 +134,4 @@ arch/arm64/configs/b/
 outM/
 drivers/cpufreq/b/
 lanp.sh
+drivers/misc/mediatek/base/power/include/upower_v2/b/

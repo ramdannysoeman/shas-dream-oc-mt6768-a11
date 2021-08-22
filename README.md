@@ -16,13 +16,17 @@ Hi build your own kernel from my source..
 
 3.Make your pc envairnment to build kernel (Help from google).
 
+# Build with clang 11
+
 4.run ./clang-13.sh (one time only)
 
-5.For build lancelot or merlin run .
+5.Then run ./lancelot.sh or merlin.sh to build kernel for specific devices. 
 
-./lancelot.sh (for lancelot).
+# Build with clang 13
 
-or ./merlin.sh (for merlin).
+4.go to https://github.com/kdrag0n/proton-clang.git clone or download put all file in /clang-13/aaa 
+
+5.Then run ./lancelotp.sh or merlinp.sh to build kernel for specific devices. 
 
 6. Go AnyKernel3-master to get your zip file.
 
