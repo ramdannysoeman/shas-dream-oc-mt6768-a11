@@ -26,11 +26,6 @@ obj-$(CONFIG_MTK_RESYM) += resym/
 obj-y += perf_ioctl/
 obj-$(CONFIG_MTK_FPSGO_V3) += fpsgo_v3/
 obj-$(CONFIG_MTK_GBE) += gbe/
-
-ifeq ($(CONFIG_THERMAL),y)
-obj-$(CONFIG_MTK_EARA_THERMAL) += eara_thermal/
-endif
-
 obj-$(CONFIG_MTK_LOAD_TRACKER) += load_track/
 obj-$(CONFIG_MTK_LOAD_TRACKER) += uload_ind/
 
