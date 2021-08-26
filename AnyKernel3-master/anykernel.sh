@@ -24,10 +24,6 @@ ramdisk_compression=auto;
 # import patching functions/variables - see for reference
 . tools/ak3-core.sh;
 
-<< ////
-
-# THIS CODE BELOW IS COMMENTED
-
 # Key select start
 ui_print " "
 ui_print "Do not touch your screen until finished!"
@@ -103,22 +99,22 @@ else
 fi
 # Key select end
 
-# Select if ram ext aka swapfile will be enabled
+# Select if ram ext aka swapfile will be enabled start
 if $NEW; then #true
   ui_print " "
   ui_print "Volume UP is pressed:"
   ui_print "RAM EXT Enabled!"
   ui_print " "
 else #false
-  echo "#empty" > $ramdisk/overlay.d/sbin/init.genom.sh;
+  echo '#!/system/bin/sh' > $ramdisk/overlay.d/sbin/swap.sh;
+  echo "exit" >> $ramdisk/overlay.d/sbin/swap.sh;
   rm /data/swapfile
   ui_print " "
   ui_print "Volume DOWN is pressed:"
   ui_print "RAM EXT Disabled!"
   ui_print " "
 fi
-
-////
+# Select if ram ext aka swapfile will be enabled end
 
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
