@@ -101,11 +101,7 @@
 int drm_irq_install(struct drm_device *dev, int irq)
 {
 	int ret;
-<<<<<<< HEAD
 	unsigned long sh_flags = 0;
-=======
-	unsigned long sh_flags = IRQF_PERF_AFFINE;
->>>>>>> 4fd48ead78bb... drivers: update
 
 	if (!drm_core_check_feature(dev, DRIVER_HAVE_IRQ))
 		return -EINVAL;
