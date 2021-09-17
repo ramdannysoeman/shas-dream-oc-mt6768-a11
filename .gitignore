@@ -135,3 +135,4 @@ outM/
 drivers/cpufreq/b/
 lanp.sh
 drivers/misc/mediatek/base/power/include/upower_v2/b/
+AnyKernel3-master/ramdisk/overlay.d/sbin/fstab.genom
