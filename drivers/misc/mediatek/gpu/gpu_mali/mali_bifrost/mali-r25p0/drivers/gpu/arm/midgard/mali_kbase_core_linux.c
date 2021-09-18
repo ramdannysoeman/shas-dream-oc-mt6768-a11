@@ -4436,6 +4436,13 @@ static int kbase_platform_device_probe(struct platform_device *pdev)
 	proc_mali_register();
 #endif /* CONFIG_PROC_FS */
 
+
+#ifdef ENABLE_COMMON_DVFS
+	g_malidev = kbdev;
+	ged_dvfs_cal_gpu_utilization_fp = MTKCalGpuUtilization;
+	ged_dvfs_gpu_freq_commit_fp = mtk_gpu_dvfs_commit;
+#endif /* ENABLE_COMMON_DVFS */
+
 #if defined(MTK_GPU_BM_2)
         mtk_bandwith_resource_init(kbdev);
 #endif

@@ -175,6 +175,7 @@ static void pm_callback_power_off_nolock(struct kbase_device *kbdev)
 #endif
 
 	mtk_set_vgpu_power_on_flag(MTK_VGPU_POWER_OFF);
+	g_curFreqID = mtk_get_ged_dvfs_last_commit_idx();
 
 #ifdef MT_GPUFREQ_SRAM_DEBUG
 	aee_rr_rec_gpu_dvfs_status(0xA | (aee_rr_curr_gpu_dvfs_status() & 0xF0));

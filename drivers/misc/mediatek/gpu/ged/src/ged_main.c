@@ -360,7 +360,13 @@ unlock_and_return:
 static int ged_pdrv_probe(struct platform_device *pdev)
 {
 #ifdef CONFIG_MTK_GPU_OPP_STATS_SUPPORT
-
+	int ret;
+	ret = ged_dvfs_init_opp_cost();
+	if (ret) {
+		GED_LOGE("@%s: failed to probe ged driver (%d)\n",
+		__func__, ret);
+	}
+	return ret;
 #else
 	return 0;
 #endif
@@ -436,6 +442,8 @@ static void ged_exit(void)
 
 	ged_ge_exit();
 
+	ged_dvfs_system_exit();
+
 	ged_notify_sw_vsync_system_exit();
 
 	ged_hal_exit();
@@ -497,6 +505,7 @@ static int ged_init(void)
 		goto ERROR;
 	}
 
+	err = ged_dvfs_system_init();
 	if (unlikely(err != GED_OK)) {
 		GED_LOGE("ged: failed to init common dvfs!\n");
 		goto ERROR;

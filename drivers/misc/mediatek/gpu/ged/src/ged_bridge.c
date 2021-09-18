@@ -81,7 +81,7 @@ int ged_bridge_query_info(
 	struct GED_BRIDGE_IN_QUERY_INFO *psQueryInfoINT,
 	struct GED_BRIDGE_OUT_QUERY_INFO *psQueryInfoOUT)
 {
-
+	psQueryInfoOUT->retrieve = ged_query_info(psQueryInfoINT->eType);
 	return 0;
 }
 //-----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ int ged_bridge_dvfs_probe(
 	struct GED_BRIDGE_IN_DVFS_PROBE *psDVFSProbeINT,
 	struct GED_BRIDGE_OUT_DVFS_PROBE *psDVFSProbeOUT)
 {
-	
+	psDVFSProbeOUT->eError = ged_dvfs_probe(psDVFSProbeINT->pid);
 	return 0;
 }
 
@@ -109,7 +109,9 @@ int ged_bridge_dvfs_um_retrun(
 	struct GED_BRIDGE_IN_DVFS_UM_RETURN *psDVFS_UM_returnINT,
 	struct GED_BRIDGE_OUT_DVFS_UM_RETURN *psDVFS_UM_returnOUT)
 {
-
+	psDVFS_UM_returnOUT->eError =
+		ged_dvfs_um_commit(psDVFS_UM_returnINT->gpu_tar_freq,
+			psDVFS_UM_returnINT->bFallback);
 	return 0;
 }
 
@@ -119,7 +121,9 @@ int ged_bridge_event_notify(
 	struct GED_BRIDGE_OUT_EVENT_NOTIFY *psEVENT_NOTIFYOUT)
 {
 	if (ged_boost_enable) {
-		
+		psEVENT_NOTIFYOUT->eError =
+			ged_dvfs_vsync_offset_event_switch(
+			psEVENT_NOTIFYINT->eEvent, psEVENT_NOTIFYINT->bSwitch);
 	} else {
 		psEVENT_NOTIFYOUT->eError = GED_OK;
 	}

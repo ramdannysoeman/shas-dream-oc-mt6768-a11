@@ -162,6 +162,11 @@ ccflags-y += -DGED_SKI_SUPPORT
 ged-y += src/ged_ski.o
 
 ifeq ($(CONFIG_MTK_GPU_COMMON_DVFS_SUPPORT),y)
+ccflags-y += -DGED_ENABLE_FB_DVFS
+ccflags-y += -DGED_ENABLE_DYNAMIC_DVFS_MARGIN
+ccflags-y += -DGED_CONFIGURE_LOADING_BASE_DVFS_STEP
+ccflags-y += -DGED_ENABLE_TIMER_BASED_DVFS_MARGIN
+ccflags-y += -DMTK_CPUFREQ
 endif
 
 ccflags-y += -DCONFIG_MTK_QOS_V1_SUPPORT
@@ -458,6 +463,9 @@ endif
 
 ifneq ($(CONFIG_FPGA_EARLY_PORTING), y)
 ifeq ($(CONFIG_MTK_GPU_COMMON_DVFS_SUPPORT),y)
+ccflags-y += -DENABLE_COMMON_DVFS \
+             -DENABLE_TIMER_BACKUP \
+             -DGED_DVFS_ENABLE
 else
 ccflags-y += -DGED_FDVFS_ENABLE
 endif
@@ -502,5 +510,6 @@ ged-y += \
     src/ged_hashtable.o \
     src/ged_thread.o \
     src/ged_ge.o \
+    src/ged_dvfs.o \
     src/ged_gpu_tuner.o \
     src/ged_kpi.o

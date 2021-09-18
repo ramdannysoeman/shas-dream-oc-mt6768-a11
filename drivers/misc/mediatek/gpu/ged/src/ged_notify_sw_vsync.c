@@ -371,8 +371,22 @@ enum hrtimer_restart ged_sw_vsync_check_cb(struct hrtimer *timer)
 			ged_alloc_atomic(sizeof(struct GED_NOTIFY_SW_SYNC));
 
 #ifndef ENABLE_TIMER_BACKUP
-		
+		ged_dvfs_cal_gpu_utilization(&gpu_av_loading,
+			&gpu_block, &gpu_idle);
+		gpu_loading = gpu_av_loading;
 #endif
+		if (false == g_bGPUClock && 0 == gpu_loading
+			&& (temp - g_ns_gpu_on_ts > GED_DVFS_TIMER_TIMEOUT)) {
+			if (psNotify) {
+				INIT_WORK(&psNotify->sWork,
+					ged_timer_switch_work_handle);
+				queue_work(g_psNotifyWorkQueue,
+					&psNotify->sWork);
+			}
+			ged_log_buf_print(ghLogBuf_DVFS,
+				"[GED_K] Timer removed	(ts=%llu) ", temp);
+			return HRTIMER_NORESTART;
+		}
 
 		if (psNotify) {
 			INIT_WORK(&psNotify->sWork,
@@ -401,6 +415,7 @@ void ged_dvfs_gpu_clock_switch_notify(bool bSwitch)
 #ifdef CONFIG_MTK_QOS_V1_SUPPORT
 		mt_gpu_bw_toggle(1);
 #endif
+		g_ns_gpu_on_ts = ged_get_time();
 		g_bGPUClock = true;
 		if (g_timer_on) {
 			ged_log_buf_print(ghLogBuf_DVFS,
