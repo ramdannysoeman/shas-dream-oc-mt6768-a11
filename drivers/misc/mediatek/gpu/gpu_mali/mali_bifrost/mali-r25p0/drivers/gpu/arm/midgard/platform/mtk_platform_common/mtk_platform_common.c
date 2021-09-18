@@ -493,11 +493,6 @@ int mtk_set_mt_gpufreq_target(int freq_id)
 	return 0;
 }
 
-unsigned long mtk_get_ged_dvfs_last_commit_idx(void)
-{
-	return ged_dvfs_get_last_commit_idx();
-}
-
 int mtk_common_init(struct platform_device *pdev, struct kbase_device *kbdev)
 {
 	int ret = 0;

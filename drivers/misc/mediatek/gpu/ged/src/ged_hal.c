@@ -146,61 +146,6 @@ static int ged_dvfs_opp_cost_seq_show(struct seq_file *psSeqFile,
 					ui32FqCount);
 		}
 
-		if (!ged_dvfs_query_opp_cost(report, ui32FqCount, false)) {
-
-			cur_idx = mt_gpufreq_get_cur_freq_index();
-			ui32TotalTrans = 0;
-
-			seq_puts(psSeqFile, "     From  :   To\n");
-			seq_puts(psSeqFile, "           :");
-
-			for (i = 0; i < ui32FqCount; i++) {
-				len = scnprintf(acBuffer, 32, "%10u",
-					1000 * mt_gpufreq_get_freq_by_idx(i));
-				acBuffer[len] = 0;
-				seq_puts(psSeqFile, acBuffer);
-			}
-
-			seq_puts(psSeqFile, "   time(ms)\n");
-
-
-			for (i = 0; i < ui32FqCount; i++) {
-				if (i == cur_idx)
-					seq_puts(psSeqFile, "*");
-				else
-					seq_puts(psSeqFile, " ");
-
-
-				len = scnprintf(acBuffer, 32, "%10u ",
-					1000 * mt_gpufreq_get_freq_by_idx(i));
-				acBuffer[len] = 0;
-				seq_puts(psSeqFile, acBuffer);
-
-				for (j = 0; j < ui32FqCount; j++) {
-					len = scnprintf(acBuffer, 32, "%10u",
-						report[i].uMem.aTrans[j]);
-					acBuffer[len] = 0;
-					seq_puts(psSeqFile, acBuffer);
-					ui32TotalTrans +=
-						report[i].uMem.aTrans[j];
-				}
-
-				/* truncate to ms */
-				len = scnprintf(acBuffer, 32, "%10u\n",
-				(unsigned int)(report[i].ui64Active) >> 10);
-				acBuffer[len] = 0;
-				seq_puts(psSeqFile, acBuffer);
-			}
-
-			len = scnprintf(acBuffer, 32,
-				"Total transition : %u\n", ui32TotalTrans);
-			acBuffer[len] = 0;
-			seq_puts(psSeqFile, acBuffer);
-		} else
-			seq_puts(psSeqFile, "Not Supported.\n");
-		vfree(report);
-	}
-
 	return 0;
 }
 /* --------------------------------------------------------------- */
@@ -232,28 +177,6 @@ static ssize_t opp_logs_show(struct kobject *kobj,
 			vmalloc(sizeof(struct GED_DVFS_OPP_STAT) *
 			ui32FqCount);
 	}
-
-	if (!ged_dvfs_query_opp_cost(report, ui32FqCount, false)) {
-
-		cur_idx = mt_gpufreq_get_cur_freq_index();
-
-		len = sprintf(buf, "   time(ms)\n");
-
-
-		for (i = 0; i < ui32FqCount; i++) {
-			if (i == cur_idx)
-				len += sprintf(buf + len, "*");
-			else
-				len += sprintf(buf + len, " ");
-			len += sprintf(buf + len, "%10lu",
-				1000 * mt_gpufreq_get_freq_by_idx(i));
-
-			/* truncate to ms */
-			len += sprintf(buf + len, "%10u\n",
-				(unsigned int)(report[i].ui64Active >> 10));
-		}
-	} else
-		len = sprintf(buf, "Not Supported.\n");
 
 	vfree(report);
 	return len;
@@ -361,8 +284,6 @@ static ssize_t current_freqency_show(struct kobject *kobj,
 {
 	struct GED_DVFS_FREQ_DATA sFreqInfo;
 
-	ged_dvfs_get_gpu_cur_freq(&sFreqInfo);
-
 	return scnprintf(buf, PAGE_SIZE, "%u %lu\n",
 		sFreqInfo.ui32Idx, sFreqInfo.ulFreq);
 }
@@ -374,9 +295,6 @@ static ssize_t previous_freqency_show(struct kobject *kobj,
 		char *buf)
 {
 	struct GED_DVFS_FREQ_DATA sFreqInfo;
-
-	ged_dvfs_get_gpu_pre_freq(&sFreqInfo);
-
 	return scnprintf(buf, PAGE_SIZE, "%u %lu\n",
 		sFreqInfo.ui32Idx, sFreqInfo.ulFreq);
 }
@@ -644,19 +562,6 @@ static int ged_fb_notifier_callback(struct notifier_block *self,
 		return 0;
 
 	blank = *(int *)evdata->data;
-
-	switch (blank) {
-	case FB_BLANK_UNBLANK:
-		g_ui32EventStatus |= GED_EVENT_LCD;
-		ged_dvfs_probe_signal(GED_GAS_SIGNAL_EVENT);
-		break;
-	case FB_BLANK_POWERDOWN:
-		g_ui32EventStatus &= ~GED_EVENT_LCD;
-		ged_dvfs_probe_signal(GED_GAS_SIGNAL_EVENT);
-		break;
-	default:
-		break;
-	}
 
 	return 0;
 }
