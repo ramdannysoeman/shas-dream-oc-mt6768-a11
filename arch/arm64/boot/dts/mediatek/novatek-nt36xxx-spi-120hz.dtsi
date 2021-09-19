@@ -529,7 +529,7 @@
 			    (-75) (-75) (-75) (-75) (-75) (-75)
 			    (-75) (-75) (-75)>;
 
-			PS_Config_Diff_Test_Frame = <50>;
+			PS_Config_Diff_Test_Frame = <70>;
 		};
 	};
 };
