@@ -6,7 +6,7 @@
  * This program is free software and is provided to you under the terms of the
  * GNU General Public License version 2 as published by the Free Software
  * Foundation, and any use by you of this program is subject to the terms
- * of such GNU licence.
+ * of such GNU license.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,8 +17,6 @@
  * along with this program; if not, you can access it online at
  * http://www.gnu.org/licenses/gpl-2.0.html.
  *
- * SPDX-License-Identifier: GPL-2.0
- *
  */
 
 /*
@@ -28,7 +26,6 @@
 #include <mali_kbase.h>
 #include <gpu/mali_kbase_gpu_regmap.h>
 #include <mali_kbase_mem_linux.h>
-#include <mali_kbase_dma_fence.h>
 #include <mali_kbase_ctx_sched.h>
 #include <mali_kbase_mem_pool_group.h>
 #include <tl/mali_kbase_timeline.h>
@@ -155,13 +152,14 @@ int kbase_context_common_init(struct kbase_context *kctx)
 
 	init_waitqueue_head(&kctx->event_queue);
 	atomic_set(&kctx->event_count, 0);
+#if !MALI_USE_CSF
 	atomic_set(&kctx->event_closed, false);
-
-	bitmap_copy(kctx->cookies, &cookies_mask, BITS_PER_LONG);
-
 #ifdef CONFIG_GPU_TRACEPOINTS
 	atomic_set(&kctx->jctx.work_id, 0);
 #endif
+#endif
+
+	bitmap_copy(kctx->cookies, &cookies_mask, BITS_PER_LONG);
 
 	kctx->id = atomic_add_return(1, &(kctx->kbdev->ctx_num)) - 1;
 
@@ -283,8 +281,8 @@ void kbase_context_mem_pool_group_term(struct kbase_context *kctx)
 
 int kbase_context_mmu_init(struct kbase_context *kctx)
 {
-	return kbase_mmu_init(kctx->kbdev,
-		&kctx->mmu, kctx,
+	return kbase_mmu_init(
+		kctx->kbdev, &kctx->mmu, kctx,
 		base_context_mmu_group_id_get(kctx->create_flags));
 }
 
@@ -345,3 +343,4 @@ void kbase_context_sticky_resource_term(struct kbase_context *kctx)
 	}
 	kbase_gpu_vm_unlock(kctx);
 }
+

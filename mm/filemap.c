@@ -2425,12 +2425,8 @@ static noinline void tracing_mark_write(bool start, struct file *file, pgoff_t o
 #define trace_fault_file_path_start(...) tracing_mark_write(1, ##__VA_ARGS__)
 #define trace_fault_file_path_end(...) tracing_mark_write(0, ##__VA_ARGS__)
 
-#if CONFIG_MMAP_READAROUND_LIMIT == 0
-int mmap_readaround_limit = (VM_MAX_READAHEAD / 4); 		/* page */
-#else
-int mmap_readaround_limit = CONFIG_MMAP_READAROUND_LIMIT; 	/* page */
-#endif
 
+int mmap_readaround_limit = (VM_MAX_READAHEAD / 4); 		/* page */
 /*
  * Synchronous readahead happens when we don't even find a page in the page
  * cache at all.  We don't want to perform IO under the mmap sem, so if we have
