@@ -173,7 +173,7 @@ int Ripi_cpu_dvfs_thread(void *data)
 	int ret;
 #endif
 	memset(pwdata, 0, sizeof(pwdata));
-	/* tag_pr_info("CPU DVFS received thread\n"); */
+	/* tag_pr_debug("CPU DVFS received thread\n"); */
 #ifndef CONFIG_MTK_TINYSYS_MCUPM_SUPPORT
 	cpufreq_act.data = (void *)cpufreq_buf;
 	ret = sspm_ipi_recv_registration_ex(IPI_ID_CPU_DVFS,
@@ -186,20 +186,20 @@ int Ripi_cpu_dvfs_thread(void *data)
 		} while (!kthread_should_stop());
 		return (-1);
 	}
-	/* tag_pr_info("sspm_ipi_recv_registration */
+	/* tag_pr_debug("sspm_ipi_recv_registration */
 	/*IPI_ID_CPU_DVFS pass!!(%d)\n", ret); */
 #else
 	wait_for_completion(&cpuhvfs_setup_done);
 #endif
 	/* an endless loop in which we are doing our work */
 	do {
-		/* tag_pr_info("sspm_ipi_recv_wait IPI_ID_CPU_DVFS\n"); */
+		/* tag_pr_debug("sspm_ipi_recv_wait IPI_ID_CPU_DVFS\n"); */
 #ifdef CONFIG_MTK_TINYSYS_MCUPM_SUPPORT
 		mtk_ipi_recv(&mcupm_ipidev, CH_S_CPU_DVFS);
 #else
 		sspm_ipi_recv_wait(IPI_ID_CPU_DVFS);
 #endif
-		/* tag_pr_info("Info: CPU DVFS thread received ID=%d,*/
+		/* tag_pr_debug("Info: CPU DVFS thread received ID=%d,*/
 		/* i=%d\n", cpufreq_act.id, i); */
 		spin_lock_irqsave(&cpudvfs_lock, flags);
 		if (((cpufreq_buf[0] >= OFFS_LOG_S) &&
@@ -939,7 +939,7 @@ void srate_doe(void)
 	ret = of_property_read_u32(node, "change_flag", &d->change_flag);
 
 	if (ret)
-		tag_pr_info("Cant find change_flag attr\n");
+		tag_pr_debug("Cant find change_flag attr\n");
 
 	if (!d->change_flag)
 		return;
@@ -1000,7 +1000,7 @@ static int _mt_dvfsp_pdrv_probe(struct platform_device *pdev)
 	ret = of_property_read_u32(pdev->dev.of_node,
 			"change_flag", &d->change_flag);
 	if (ret)
-		tag_pr_info("Cant find change_flag attr\n");
+		tag_pr_debug("Cant find change_flag attr\n");
 	if (d->change_flag) {
 		for (i = 0; i < NR_MT_CPU_DVFS; i++) {
 			flag = 0;
@@ -1008,12 +1008,12 @@ static int _mt_dvfsp_pdrv_probe(struct platform_device *pdev)
 					d->dtsn[i],
 			d->dts_opp_tbl[i], ARRAY_SIZE(d->dts_opp_tbl[i]));
 			if (ret)
-				tag_pr_info("Cant find %s node\n", d->dtsn[i]);
+				tag_pr_debug("Cant find %s node\n", d->dtsn[i]);
 		else {
 			for (j = 0; j < ARRAY_SIZE(d->dts_opp_tbl[i]); j++) {
 				if (!d->dts_opp_tbl[i][j]) {
 					flag = 1;
-					tag_pr_info
+					tag_pr_debug
 					("@@ %s contain illegal value\n",
 					d->dtsn[i]);
 					break;
@@ -1024,7 +1024,7 @@ static int _mt_dvfsp_pdrv_probe(struct platform_device *pdev)
 		}
 #if 0
 		for (j = 0; j < NR_FREQ * ARRAY_COL_SIZE; j++)
-			tag_pr_info("@@@ %d pvt[%d] = %u\n",
+			tag_pr_debug("@@@ %d pvt[%d] = %u\n",
 					i, j, d->dts_opp_tbl[i][j]);
 #endif
 	}
@@ -1573,7 +1573,7 @@ void update_pvt_tbl_by_doe(void)
 			memcpy(&(*(recordTbl + (NR_FREQ * i) * ARRAY_COL_SIZE)),
 				d->dts_opp_tbl[i], sizeof(d->dts_opp_tbl[i]));
 #if 0
-			tag_pr_info("@@@[%s] %d update doe_flag = %d\n",
+			tag_pr_debug("@@@[%s] %d update doe_flag = %d\n",
 					__func__, i, d->doe_flag);
 #endif
 		}
@@ -1598,7 +1598,7 @@ void cpuhvfs_pvt_tbl_create(void)
 #endif
 
 	recordRef = ioremap_nocache(DBG_REPO_TBL_S, PVT_TBL_SIZE);
-	tag_pr_info("DVFS - @(Record)%s----->(%p)\n", __func__, recordRef);
+	tag_pr_debug("DVFS - @(Record)%s----->(%p)\n", __func__, recordRef);
 	memset_io((u8 *)recordRef, 0x00, PVT_TBL_SIZE);
 
 	recordTbl = xrecordTbl[lv];
@@ -1694,7 +1694,7 @@ void cpuhvfs_pvt_tbl_create(void)
 
 #ifdef CCI_MAP_TBL_SUPPORT
 	record_CCI_Ref = ioremap_nocache(DBG_REPO_CCI_TBL_S, PVT_CCI_TBL_SIZE);
-	tag_pr_info("DVFS - @(Record)%s----->(%p)\n", __func__, record_CCI_Ref);
+	tag_pr_debug("DVFS - @(Record)%s----->(%p)\n", __func__, record_CCI_Ref);
 	memset_io((u8 *)record_CCI_Ref, 0x00, PVT_CCI_TBL_SIZE);
 
 	record_CCI_Tbl = xrecord_CCI_Tbl[lv];
@@ -1715,11 +1715,11 @@ void cpuhvfs_pvt_tbl_create(void)
 	node = of_find_compatible_node(NULL, NULL, DVFSP_DT_NODE);
 	ret = of_property_read_u32(node, "imax_state", &imax_state);
 	if (ret)
-		tag_pr_info(" %s Cant find imax state node\n", __func__);
+		tag_pr_debug(" %s Cant find imax state node\n", __func__);
 #endif
 	record_IMAX_Ref = ioremap_nocache(DBG_REPO_IMAX_TBL_S,
 			PVT_IMAX_TBL_SIZE);
-	tag_pr_info("DVFS - @(IMAX Record)%s----->(%p)\n", __func__,
+	tag_pr_debug("DVFS - @(IMAX Record)%s----->(%p)\n", __func__,
 			record_IMAX_Ref);
 	memset_io((u8 *)record_IMAX_Ref, 0x00, PVT_IMAX_TBL_SIZE);
 
@@ -1902,7 +1902,7 @@ static int cpuhvfs_pre_module_init(void)
 	node = of_find_compatible_node(NULL, NULL, DVFSP_DT_NODE);
 	ret = of_property_read_u32(node, "state", &d->state);
 	if (ret)
-		tag_pr_info(" %s Cant find state node\n", __func__);
+		tag_pr_debug(" %s Cant find state node\n", __func__);
 
 	tag_pr_notice("@@~%s DVFS state = %d\n", __func__, d->state);
 	if (!d->state)
