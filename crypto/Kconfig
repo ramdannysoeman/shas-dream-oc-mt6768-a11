@@ -1626,18 +1626,6 @@ config CRYPTO_TWOFISH_AVX_X86_64
 
 comment "Compression"
 
-config CRYPTO_DEFLATE
-	tristate "Deflate compression algorithm"
-	select CRYPTO_ALGAPI
-	select CRYPTO_ACOMP2
-	select ZLIB_INFLATE
-	select ZLIB_DEFLATE
-	help
-	  This is the Deflate algorithm (RFC1951), specified for use in
-	  IPSec with the IPCOMP protocol (RFC3173, RFC2394).
-
-	  You will most probably want this if using IPSec.
-
 config CRYPTO_LZO
 	tristate "LZO compression algorithm"
 	select CRYPTO_ALGAPI
