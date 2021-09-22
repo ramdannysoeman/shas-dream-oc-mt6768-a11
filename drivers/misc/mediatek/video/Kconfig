@@ -151,7 +151,7 @@ config MTK_CONSUMER_PARTIAL_UPDATE_SUPPORT
 
 config MTK_PQ_COLOR_MODE
 	string "Config PQ_COLOR_MODE (MDP & DISP COLOR on/off)"
-	default "MDP"
+	default "DISP"
 	help
 	  This control mdp color on/off and disp color on/off
 	  if value equals to DISP, only display color is on.
