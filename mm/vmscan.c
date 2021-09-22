@@ -2261,7 +2261,6 @@ static unsigned long shrink_list(enum lru_list lru, unsigned long nr_to_scan,
 	return shrink_inactive_list(nr_to_scan, lruvec, sc, lru);
 }
 
-#ifdef CONFIG_MTK_GMO_RAM_OPTIMIZE
 /* threshold of swapin and out */
 static unsigned int swpinout_threshold = 12000;
 module_param_named(threshold, swpinout_threshold, uint, 0644);
@@ -2307,7 +2306,6 @@ static bool swap_is_allowed(void)
 
 	return no_thrashing;
 }
-#endif
 
 enum scan_balance {
 	SCAN_EQUAL,
@@ -2698,7 +2696,6 @@ out:
 	}
 }
 
-#ifdef CONFIG_MTK_GMO_RAM_OPTIMIZE
 /*
  * When the length of inactive lru is smaller than 256(SWAP_CLUSTER_MAX << 3),
  * there is high risk to suffer from congestion wait.
@@ -2707,7 +2704,6 @@ out:
  */
 static int scan_anon_priority = 4;
 module_param_named(scan_anon_prio, scan_anon_priority, int, 0644);
-#endif
 
 /*
  * This is a basic per-node page freer.  Used by both kswapd and direct reclaim.
@@ -2730,7 +2726,6 @@ static void shrink_node_memcg(struct pglist_data *pgdat, struct mem_cgroup *memc
 	/* Record the original scan target for proportional adjustments later */
 	memcpy(targets, nr, sizeof(nr));
 
-#ifdef CONFIG_MTK_GMO_RAM_OPTIMIZE
 	/*
 	 * sc->priority: 12, 11, 10,  9
 	 * (4)    shift:  4,  3,  2,  1
@@ -2751,7 +2746,6 @@ static void shrink_node_memcg(struct pglist_data *pgdat, struct mem_cgroup *memc
 
 		nr[LRU_ACTIVE_ANON] = nr[LRU_INACTIVE_ANON];
 	}
-#endif
 
 	/*
 	 * Global reclaiming within direct reclaim at DEF_PRIORITY is a normal
