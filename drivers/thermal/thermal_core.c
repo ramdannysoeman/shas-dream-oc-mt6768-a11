@@ -1283,6 +1283,8 @@ cpu_limits_store(struct device *dev,
 	else
 		cpu = 1;
 
+	mt_ppm_sysboost_set_freq_limit(BOOST_BY_XM_THERMAL, cpu, -1, max);
+
 	return len;
 }
 

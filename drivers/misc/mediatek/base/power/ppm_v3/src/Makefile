@@ -55,9 +55,10 @@ obj-y += mtk_ppm_cpi.o
 
 # policies
 obj-y += mtk_ppm_policy_dlpt.o
+obj-y += mtk_ppm_policy_sys_boost.o
 obj-y += mtk_ppm_policy_ptpod.o
 # for test purpose
-
+obj-y += mtk_ppm_policy_ut.o
 
 # platform dependent files
 obj-y += mach/
