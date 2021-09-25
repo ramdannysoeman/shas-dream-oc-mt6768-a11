@@ -1527,9 +1527,7 @@ static void get_volt_table_in_thread(struct eem_det *det)
 	ndet->temp = ndet->ops->get_temp(det);
 
 #if UPDATE_TO_UPOWER
-	upower_update_degree_by_eem
-		(transfer_ptp_to_upower_bank(det_to_id(ndet)),
-		ndet->temp/1000);
+	
 #endif
 
 #ifdef CONFIG_THERMAL
@@ -2459,7 +2457,6 @@ static void eem_update_init2_volt_to_upower
 	bank = transfer_ptp_to_upower_bank(det_to_id(det));
 #if 1
 	if (bank < NR_UPOWER_BANK) {
-		upower_update_volt_by_eem(bank, volt_tbl, det->num_freq_tbl);
 		/* eem_debug
 		 * ("update init2 volt to upower
 		 * (eem bank %ld upower bank %d)\n",
