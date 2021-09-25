@@ -2881,7 +2881,7 @@ static void __mt_gpufreq_init_others(void)
 
 #ifdef MT_GPUFREQ_STATIC_PWR_READY2USE
 	/* Initial leackage power usage */
-	
+	mt_spower_init();
 #endif /* ifdef MT_GPUFREQ_STATIC_PWR_READY2USE */
 
 #ifdef MT_GPUFREQ_LOW_BATT_VOLT_PROTECT
