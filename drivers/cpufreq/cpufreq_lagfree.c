@@ -319,7 +319,7 @@ static struct attribute * dbs_attributes[] = {
 
 static struct attribute_group dbs_attr_group = {
 	.attrs = dbs_attributes,
-	.name = "lagfree",
+	.name = "Shas_Dream",
 };
 
 /************************** sysfs end ************************/
@@ -503,7 +503,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 static
 #endif
 struct cpufreq_governor cpufreq_gov_lagfree = {
-	.name			= "lagfree",
+	.name			= "Shas_Dream",
 	.owner			= THIS_MODULE,
 };
 
