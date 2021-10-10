@@ -796,23 +796,6 @@ def parse_config_create_cmd_args(arglist):
                         dest='dtbdir', default=cwd)
     return parser.parse_args(arglist)
 
-def create_dtbo_image(fout, argv):
-    """Create Device Tree Blob Overlay image using provided arguments.
-
-    Args:
-        fout: Output file handle to write to.
-        argv: list of command line arguments.
-    """
-
-    global_args, remainder = parse_create_args(argv)
-    if not remainder:
-        raise ValueError('List of dtimages to add to DTBO not provided')
-    dt_entries = parse_dt_entries(global_args, remainder)
-    dtbo = Dtbo(fout, global_args.dt_type, global_args.page_size, global_args.version)
-    dt_entry_buf = dtbo.add_dt_entries(dt_entries)
-    dtbo.commit(dt_entry_buf)
-    fout.close()
-
 def dump_dtbo_image(fin, argv):
     """Dump DTBO file.
 
@@ -978,8 +961,7 @@ def main():
     create_parser.add_argument('argfile', nargs='?',
                                action='store', help='Output File',
                                type=argparse.FileType('wb'))
-    create_parser.set_defaults(func=create_dtbo_image)
-
+   
     config_parser = subparser.add_parser('cfg_create', add_help=False)
     config_parser.add_argument('argfile', nargs='?',
                                action='store',
@@ -997,7 +979,7 @@ def main():
     help_parser.set_defaults(func=print_usage)
 
     (subcmd, subcmd_args) = parser.parse_known_args()
-    subcmd.func(subcmd.argfile, subcmd_args)
+
 
 if __name__ == '__main__':
     main()

@@ -12,16 +12,10 @@ dtb-y += $(addsuffix .dtb, $(notdir $(subst $\",,$(CONFIG_BUILD_ARM64_APPENDED_D
 endif
 
 ifeq ($(strip $(CONFIG_BUILD_ARM64_DTB_OVERLAY_IMAGE)), y)
-<<<<<<< HEAD
-dtbo-y += $(addsuffix .dtbo, $(notdir $(subst $\",,$(CONFIG_BUILD_ARM64_DTB_OVERLAY_IMAGE_NAMES))))
-endif
-
-always		:= $(dtb-y) $(dtbo-y)
-=======
 dtb-y += $(addsuffix .dtb, $(notdir $(subst $\",,$(CONFIG_BUILD_ARM64_DTB_OVERLAY_IMAGE_NAMES))))
 endif
 
 always		:= $(dtb-y)
->>>>>>> 14d1d2cf21f8479f6fd074e48490030c81715adb
 subdir-y	:= $(dts-dirs)
-clean-files	:= *.dtb *.dtbo
+clean-files	:= *.dtb
+
