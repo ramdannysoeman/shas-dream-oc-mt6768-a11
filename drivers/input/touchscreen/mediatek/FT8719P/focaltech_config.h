@@ -137,9 +137,7 @@
  * show debug log info
  * enable it for debug, disable it for release
  */
-
 #define FTS_DEBUG_EN                            1
-
 
 /*
  * Linux MultiTouch Protocol
@@ -163,17 +161,13 @@
  * ESD check & protection
  * default: disable
  */
-
 #define FTS_ESDCHECK_EN                         1
-
 
 /*
  * Production test enable
  * 1: enable, 0:disable(default)
  */
-
 #define FTS_TEST_EN                             1
-
 
 /*
  * Proximity sensor

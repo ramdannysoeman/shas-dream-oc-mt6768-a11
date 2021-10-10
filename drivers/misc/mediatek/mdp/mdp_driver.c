@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -155,7 +156,7 @@ static int cmdq_release(struct inode *pInode, struct file *pFile)
 	struct cmdqFileNodeStruct *pNode;
 	unsigned long flags;
 
-	CMDQ_LOG("CMDQ driver release fd=%p begin\n", pFile);
+	CMDQ_VERBOSE("CMDQ driver release fd=%p begin\n", pFile);
 
 	pNode = (struct cmdqFileNodeStruct *)pFile->private_data;
 
@@ -173,9 +174,6 @@ static int cmdq_release(struct inode *pInode, struct file *pFile)
 
 	spin_unlock_irqrestore(&pNode->nodeLock, flags);
 
-	/* release by mapping job */
-	mdp_ioctl_free_job_by_node(pNode);
-
 	/* scan through tasks that created by
 	 * this file node and release them
 	 */
@@ -187,7 +185,7 @@ static int cmdq_release(struct inode *pInode, struct file *pFile)
 	mdp_ioctl_free_readback_slots_by_node(pFile);
 	cmdqCoreFreeWriteAddressByNode(pFile, CMDQ_CLT_MDP);
 
-	CMDQ_LOG("CMDQ driver release end\n");
+	CMDQ_VERBOSE("CMDQ driver release end\n");
 
 	return 0;
 }
@@ -1255,7 +1253,7 @@ static int cmdq_probe(struct platform_device *pDevice)
 	cmdq_core_initialize();
 
 	/* init cmdq context */
-	cmdq_mdp_init(pDevice);
+	cmdq_mdp_init();
 #if 0
 	cmdqCoreInitialize();
 #endif

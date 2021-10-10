@@ -83,7 +83,9 @@ static struct charger_manager *pinfo;
 static struct list_head consumer_head = LIST_HEAD_INIT(consumer_head);
 static DEFINE_MUTEX(consumer_mutex);
 
-#if defined(TARGET_PRODUCT_LANCELOT) || defined(TARGET_PRODUCT_SHIVA)
+
+#if defined(CONFIG_TARGET_PRODUCT_LANCELOTCOMMON) || defined(CONFIG_TARGET_PRODUCT_SHIVACOMMON)
+
 
 typedef enum {
 	PCBA_UNKNOW = 0,
@@ -749,6 +751,7 @@ int charger_manager_enable_chg_type_det(bool en)
 	return 0;
 }
 
+
 int charger_manager_pd_is_online(void)
 {
 	if (pinfo == NULL)
@@ -798,9 +801,6 @@ int charger_manager_get_ibus(int *ibus)
 
 	return 0;
 }
-
-
-
 
 int charger_manager_set_input_suspend(int suspend)
 {
@@ -857,7 +857,9 @@ void charger_manager_set_prop_system_temp_level(int temp_level)
 	if (pinfo == NULL)
 		return ;
 	pcba_to_thermal = get_huaqin_pcba_config();
-#if defined(TARGET_PRODUCT_LANCELOT) || defined(TARGET_PRODUCT_SHIVA)
+
+#if defined(CONFIG_TARGET_PRODUCT_LANCELOTCOMMON) || defined(CONFIG_TARGET_PRODUCT_SHIVACOMMON)
+
 	if (pcba_to_thermal == PCBA_J19_MP_CN)
 		is_cn = true;
 #else

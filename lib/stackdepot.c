@@ -81,8 +81,7 @@ static int next_slab_inited;
 static size_t depot_offset;
 static DEFINE_RAW_SPINLOCK(depot_lock);
 static struct stack_record *max_found;
-static DEFINE_SPINLOCK(max_found_lock);
-
+static DEFINE_RAW_SPINLOCK(max_found_lock);
 
 static bool init_stack_slab(void **prealloc)
 {

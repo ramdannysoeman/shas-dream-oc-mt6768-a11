@@ -111,9 +111,6 @@ static int generate_cpu_mask(unsigned int prefer_type, struct cpumask *cpu_mask)
 	else if (prefer_type == FPSGO_PREFER_BIG) {
 		cpumask_clear(cpu_mask);
 		cpumask_set_cpu(7, cpu_mask);
-	} else if (prefer_type == FPSGO_PREFER_L_M) {
-		cpumask_setall(cpu_mask);
-		cpumask_clear_cpu(7, cpu_mask);
 	} else
 		return -1;
 
@@ -131,7 +128,6 @@ void fbt_set_affinity(pid_t pid, unsigned int prefer_type)
 					&mask[FPSGO_PREFER_LITTLE]);
 		generate_cpu_mask(FPSGO_PREFER_NONE, &mask[FPSGO_PREFER_NONE]);
 		generate_cpu_mask(FPSGO_PREFER_BIG, &mask[FPSGO_PREFER_BIG]);
-		generate_cpu_mask(FPSGO_PREFER_L_M, &mask[FPSGO_PREFER_L_M]);
 	}
 
 	ret = sched_setaffinity(pid, &mask[prefer_type]);
@@ -169,16 +165,18 @@ int fbt_get_default_adj_loading(void)
 	return 1;
 }
 
-int fbt_get_cluster_limit(int *cluster, int *freq, int *r_freq)
+int fbt_get_cluster_limit(int *cluster, int *freq, int *limit_floor)
 {
 /*
  * when return value is zero -> no limit
- * when cluster is not set -> no limit
+ * when cluster is set but freq is zero -> isolation
  * when cluster is set and freq is set -> ceiling limit
- * when cluster is set and r_freq is set -> rescue ceiling limit
+ * when cluster is set and limit_floor is set -> soft floor limit,
+ * allow only one of critical list to break the floor limit
  */
 	*cluster = 2;
-	*freq = 2600000;
+	*freq = INT_MAX;
+	*limit_floor = 2600000;
 	return 1;
 }
 

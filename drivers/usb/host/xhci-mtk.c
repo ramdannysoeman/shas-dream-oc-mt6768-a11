@@ -2,6 +2,7 @@
  * MediaTek xHCI Host Controller Driver
  *
  * Copyright (c) 2015 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author:
  *  Chunfeng Yun <chunfeng.yun@mediatek.com>
  *
@@ -984,8 +985,6 @@ static int xhci_mtk_remove(struct platform_device *dev)
 
 	pm_runtime_put_noidle(&dev->dev);
 	pm_runtime_disable(&dev->dev);
-
-	xhci->xhc_state |= XHCI_STATE_REMOVING;
 
 #if IS_ENABLED(CONFIG_MACH_MT6853)
 	if (mtk->last_speed == DEV_SPEED_FULL) {

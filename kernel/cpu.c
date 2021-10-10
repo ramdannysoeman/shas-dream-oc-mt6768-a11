@@ -1,3 +1,4 @@
+
 /* CPU control.
  * (C) 2001, 2002, 2003, 2004 Rusty Russell
  *
@@ -30,6 +31,7 @@
 #include <linux/relay.h>
 #include <linux/slab.h>
 #include <linux/percpu-rwsem.h>
+#include <linux/interrupt.h>
 #include <linux/cpuset.h>
 #include <linux/interrupt.h>
 

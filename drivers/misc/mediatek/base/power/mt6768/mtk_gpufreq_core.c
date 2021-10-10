@@ -2600,6 +2600,7 @@ static void __mt_gpufreq_setup_opp_table(struct g_opp_table_info *freqs, int num
 	g_segment_max_opp_idx = 0;
 	g_segment_min_opp_idx = 39;
 
+
 	g_max_opp_idx_num = num;
 	g_max_limited_idx = g_segment_max_opp_idx;
 	g_limiter = -1;

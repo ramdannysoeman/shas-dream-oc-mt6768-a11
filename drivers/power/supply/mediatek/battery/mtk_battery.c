@@ -626,8 +626,8 @@ static int battery_set_property(struct power_supply *psy,
 		break;
 	}
 
-	return rc;
 
+	return rc;
 
 }
 

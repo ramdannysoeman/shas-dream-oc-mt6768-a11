@@ -30,8 +30,8 @@
 #include "gc.h"
 #include "iostat.h"
 #include <trace/events/f2fs.h>
-#include <trace/events/android_fs.h>
 #include <uapi/linux/f2fs.h>
+#include <trace/events/android_fs.h>
 
 static int f2fs_filemap_fault(struct vm_fault *vmf)
 {

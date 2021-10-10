@@ -243,6 +243,23 @@ static int f2fs_match_ci_name(const struct inode *dir, const struct qstr *name,
 	}
 
 	res = utf8_strncasecmp_folded(um, name, &entry);
+	if (res < 0) {
+		/*
+		 * In strict mode, ignore invalid names.  In non-strict mode,
+		 * fall back to treating them as opaque byte sequences.
+		 */
+		if (sb_has_enc_strict_mode(sb) || name->len != entry.len)
+			res = 1;
+		else
+			res = memcmp(name->name, entry.name, name->len);
+	}
+out:
+	kfree(decrypted_name.name);
+	return res == 0;
+=======
+	}
+
+	res = utf8_strncasecmp_folded(um, name, &entry);
 	/*
 	 * In strict mode, ignore invalid names.  In non-strict mode,
 	 * fall back to treating them as opaque byte sequences.
@@ -257,6 +274,7 @@ static int f2fs_match_ci_name(const struct inode *dir, const struct qstr *name,
 out:
 	kfree(decrypted_name.name);
 	return res;
+>>>>>>> e367cc29397c5dc5d2c63a472287d1eeaf14e0b5
 }
 #endif /* CONFIG_UNICODE */
 

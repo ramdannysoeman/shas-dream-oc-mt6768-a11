@@ -122,7 +122,16 @@ static void xfrm_hash_transfer(struct hlist_head *list,
 			h = __xfrm_spi_hash(&x->id.daddr, x->id.spi,
 					    x->id.proto, x->props.family,
 					    nhashmask);
+#ifdef MTK_XFM_DEBUG
+			pr_info("[mtk_net][xfrm_state] add list %s x %px byspi %px  h %d\n",
+				__func__, x, nspitable, h);
+#endif
+			xfrm_state_get_back_trace(&x->xfrm_transfer_trace);
+			format_trace_info();
+			xfrm_state_check_add_byspi_hlish(nspitable + h, x, dmsg);
 			hlist_add_head_rcu(&x->byspi, nspitable + h);
+			format_trace_info();
+			xfrm_state_check_add_byspi_hlish(nspitable + h, NULL, dmsg);
 		}
 	}
 }
@@ -2103,8 +2112,18 @@ int xfrm_alloc_spi(struct xfrm_state *x, u32 low, u32 high)
 		spin_lock_bh(&net->xfrm.xfrm_state_lock);
 		x->id.spi = newspi;
 		h = xfrm_spi_hash(net, &x->id.daddr, x->id.spi, x->id.proto, x->props.family);
+		xfrm_state_get_back_trace(&x->xfrm_alloc_trace);
+		format_trace_info();
+		xfrm_state_check_add_byspi_hlish(net->xfrm.state_byspi + h, x, dmsg);
 		hlist_add_head_rcu(&x->byspi, net->xfrm.state_byspi + h);
+#ifdef MTK_XFM_DEBUG
+		pr_info("[mtk_net][xfrm_state]add list  %s x %px byspi %px  h %d\n",
+			__func__, x, net->xfrm.state_byspi, h);
+#endif
+		format_trace_info();
+		xfrm_state_check_add_byspi_hlish(net->xfrm.state_byspi + h, NULL, dmsg);
 		spin_unlock_bh(&net->xfrm.xfrm_state_lock);
+
 		err = 0;
 	}
 

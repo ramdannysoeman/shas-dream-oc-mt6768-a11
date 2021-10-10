@@ -802,7 +802,6 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		retval = request_threaded_irq(gf_dev->irq, NULL, gf_irq,
 
 				IRQF_TRIGGER_RISING | IRQF_ONESHOT, "goodix_fp_irq", gf_dev);
-
 		if (!retval)
 			gf_debug(INFO_LOG, "%s irq thread request success!\n", __func__);
 		else

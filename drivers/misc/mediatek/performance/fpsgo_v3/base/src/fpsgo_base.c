@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2017 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -30,7 +31,6 @@
 #include "fpsgo_sysfs.h"
 #include "fbt_cpu.h"
 #include "fps_composer.h"
-#include "uboost.h"
 
 #include <linux/preempt.h>
 #include <linux/trace_events.h>
@@ -306,7 +306,6 @@ void fpsgo_traverse_linger(unsigned long long cur_ts)
 			FPSGO_LOGI("timeout %d(%p)(%llu),",
 				pos->pid, pos, pos->linger_ts);
 			fpsgo_base2fbt_cancel_jerk(pos);
-			fpsgo_base2uboost_cancel(pos);
 			fpsgo_del_linger(pos);
 			tofree = 1;
 			n = rb_first(&linger_tree);
@@ -318,24 +317,6 @@ void fpsgo_traverse_linger(unsigned long long cur_ts)
 		if (tofree)
 			kfree(pos);
 	}
-}
-
-int fpsgo_base_is_finished(struct render_info *thr)
-{
-	fpsgo_lockprove(__func__);
-	fpsgo_thread_lockprove(__func__, &(thr->thr_mlock));
-
-	if (!fpsgo_base2fbt_is_finished(thr))
-		return 0;
-
-	if (thr->uboost_info.uboosting) {
-		FPSGO_LOGE("(%d, %llu)(%p)(%d, %d)\n",
-			thr->pid, thr->buffer_id, thr, thr->linger,
-			thr->uboost_info.uboosting);
-		return 0;
-	}
-
-	return 1;
 }
 
 struct render_info *fpsgo_search_and_add_render_info(int pid,
@@ -393,9 +374,6 @@ void fpsgo_delete_render_info(int pid,
 	struct render_info *data;
 	int delete = 0;
 	int check_max_blc = 0;
-	int max_pid = 0;
-	unsigned long long max_buffer_id = 0;
-	int max_ret;
 
 	fpsgo_lockprove(__func__);
 
@@ -405,8 +383,8 @@ void fpsgo_delete_render_info(int pid,
 		return;
 
 	fpsgo_thread_lock(&data->thr_mlock);
-	max_ret = fpsgo_base2fbt_get_max_blc_pid(&max_pid, &max_buffer_id);
-	if (max_ret && pid == max_pid && buffer_id == max_buffer_id)
+	if (pid == fpsgo_base2fbt_get_max_blc_pid() &&
+			buffer_id == fpsgo_base2fbt_get_max_blc_buffer_id())
 		check_max_blc = 1;
 
 	rb_erase(&data->render_key_node, &render_pid_tree);
@@ -417,11 +395,16 @@ void fpsgo_delete_render_info(int pid,
 	data->p_blc = NULL;
 	data->dep_arr = NULL;
 
-	if (fpsgo_base_is_finished(data))
+	if (data->boost_info.proc.jerks[0].jerking == 0
+		&& data->boost_info.proc.jerks[1].jerking == 0)
 		delete = 1;
 	else {
 		delete = 0;
 		data->linger = 1;
+		FPSGO_LOGE("set %d linger since (%d, %d) is rescuing.\n",
+			data->pid,
+			data->boost_info.proc.jerks[0].jerking,
+			data->boost_info.proc.jerks[1].jerking);
 		fpsgo_add_linger(data);
 	}
 	fpsgo_thread_unlock(&data->thr_mlock);
@@ -540,7 +523,8 @@ void fpsgo_check_thread_status(void)
 	expire_ts = ts - TIME_1S;
 
 	fpsgo_render_tree_lock(__func__);
-	fpsgo_base2fbt_get_max_blc_pid(&temp_max_pid, &temp_max_bufid);
+	temp_max_pid = fpsgo_base2fbt_get_max_blc_pid();
+	temp_max_bufid = fpsgo_base2fbt_get_max_blc_buffer_id();
 
 	n = rb_first(&render_pid_tree);
 	while (n) {
@@ -562,11 +546,17 @@ void fpsgo_check_thread_status(void)
 			iter->dep_arr = NULL;
 			n = rb_first(&render_pid_tree);
 
-			if (fpsgo_base_is_finished(iter))
+			if (iter->boost_info.proc.jerks[0].jerking == 0
+				&& iter->boost_info.proc.jerks[1].jerking == 0)
 				delete = 1;
 			else {
 				delete = 0;
 				iter->linger = 1;
+				FPSGO_LOGE(
+				"set %d linger since (%d, %d) is rescuing\n",
+				iter->pid,
+				iter->boost_info.proc.jerks[0].jerking,
+				iter->boost_info.proc.jerks[1].jerking);
 				fpsgo_add_linger(iter);
 			}
 
@@ -628,11 +618,17 @@ void fpsgo_clear(void)
 		iter->dep_arr = NULL;
 		n = rb_first(&render_pid_tree);
 
-		if (fpsgo_base_is_finished(iter))
+		if (iter->boost_info.proc.jerks[0].jerking == 0
+			&& iter->boost_info.proc.jerks[1].jerking == 0)
 			delete = 1;
 		else {
 			delete = 0;
 			iter->linger = 1;
+			FPSGO_LOGE(
+				"set %d linger since (%d, %d) is rescuing\n",
+				iter->pid,
+				iter->boost_info.proc.jerks[0].jerking,
+				iter->boost_info.proc.jerks[1].jerking);
 			fpsgo_add_linger(iter);
 		}
 
@@ -643,26 +639,6 @@ void fpsgo_clear(void)
 	}
 
 	fpsgo_render_tree_unlock(__func__);
-}
-
-int fpsgo_uboost_traverse(unsigned long long ts)
-{
-	struct rb_node *n;
-	struct render_info *iter;
-	int result = 0;
-
-	fpsgo_render_tree_lock(__func__);
-
-	for (n = rb_first(&render_pid_tree); n != NULL; n = rb_next(n)) {
-		iter = rb_entry(n, struct render_info, render_key_node);
-		fpsgo_thread_lock(&iter->thr_mlock);
-		fpsgo_base2uboost_compute(iter, ts);
-		fpsgo_thread_unlock(&iter->thr_mlock);
-	}
-
-	fpsgo_render_tree_unlock(__func__);
-
-	return result;
 }
 
 static struct BQ_id *fpsgo_get_BQid_by_key(unsigned long long key,
@@ -932,17 +908,6 @@ static ssize_t render_info_show(struct kobject *kobj,
 	}
 
 	rcu_read_unlock();
-
-	for (n = rb_first(&linger_tree); n != NULL; n = rb_next(n)) {
-		iter = rb_entry(n, struct render_info, linger_node);
-		length = scnprintf(temp + pos, FPSGO_SYSFS_MAX_BUFF_SIZE - pos,
-			"(%5d %4llu) linger %d uboost %d timer %d\n",
-			iter->pid, iter->buffer_id, iter->linger,
-			iter->uboost_info.uboosting,
-			fpsgo_base2fbt_is_finished(iter));
-		pos += length;
-	}
-
 	fpsgo_render_tree_unlock(__func__);
 
 	return scnprintf(buf, PAGE_SIZE, "%s", temp);

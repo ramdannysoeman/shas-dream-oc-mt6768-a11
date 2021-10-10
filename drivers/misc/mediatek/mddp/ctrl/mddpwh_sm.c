@@ -3,6 +3,7 @@
  * mddpwh_sm.c - MDDPWH (WiFi Hotspot) state machine.
  *
  * Copyright (c) 2020 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/slab.h>
@@ -190,8 +191,6 @@ static void mddpwh_sm_rsp_act_ok(struct mddp_app_t *app)
 	// 2. Send RSP to upper module.
 	mddp_dev_response(app->type, MDDP_CMCMD_ACT_RSP,
 			true, (uint8_t *)&act, sizeof(act));
-
-	mddp_netfilter_hook();
 }
 
 static void mddpwh_sm_rsp_act_fail(struct mddp_app_t *app)
@@ -245,8 +244,6 @@ static void mddpwh_sm_rsp_deact(struct mddp_app_t *app)
 	// 3. Send RSP to upper module.
 	mddp_dev_response(app->type, MDDP_CMCMD_DEACT_RSP,
 			true, (uint8_t *)&deact, sizeof(deact));
-
-	mddp_netfilter_unhook();
 }
 
 //------------------------------------------------------------------------------
@@ -825,11 +822,7 @@ static ssize_t mddpwh_sysfs_callback(
 	char *buf,
 	size_t buf_len)
 {
-#ifdef CONFIG_MTK_MDDP_WH_SUPPORT
 	static uint8_t                  mddpwh_state = 1;
-#else
-	static uint8_t                  mddpwh_state;
-#endif
 	struct mddpw_net_stat_t        *md_stats;
 	uint8_t                         smem_attr;
 	uint32_t                        smem_size;

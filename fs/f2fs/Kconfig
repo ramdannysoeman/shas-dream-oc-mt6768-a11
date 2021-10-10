@@ -176,4 +176,3 @@ config F2FS_FAKE_KERNEL_VERSION
 	string "Kernel version for fsck.f2fs"
 	depends on F2FS_REPORT_FAKE_KERNEL_VERSION
 	default "#1 SMP PREEMPT Tue Jul 13 00:53:27 CST 2021"
-
