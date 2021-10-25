@@ -84,7 +84,7 @@ unsigned int sysctl_sched_cstate_aware = 1;
  *
  * (default SCHED_TUNABLESCALING_LOG = *(1+ilog(ncpus))
  */
-enum sched_tunable_scaling sysctl_sched_tunable_scaling = SCHED_TUNABLESCALING_LINEAR;
+enum sched_tunable_scaling sysctl_sched_tunable_scaling = SCHED_TUNABLESCALING_LOG;
 
 /*
  * Minimal preemption granularity for CPU-bound tasks:
@@ -804,12 +804,6 @@ void post_init_entity_util_avg(struct sched_entity *se)
 	struct sched_avg *sa = &se->avg;
 	long cpu_scale = arch_scale_cpu_capacity(NULL, cpu_of(rq_of(cfs_rq)));
 	long cap = (long)(cpu_scale - cfs_rq->avg.util_avg) / 2;
-	int forked_ramup_factor = sched_forked_ramup_factor();
-
-	if (forked_ramup_factor != 0) {
-
-		cap = (long) SCHED_CAPACITY_SCALE * forked_ramup_factor / 100;
-	}
 
 	if (cap > 0) {
 		if (cfs_rq->avg.util_avg != 0) {
@@ -3498,9 +3492,6 @@ update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq)
 {
 	struct sched_avg *sa = &cfs_rq->avg;
 	int decayed, removed_load = 0, removed_util = 0;
-	struct rq *rq = rq_of(cfs_rq);
-	bool is_clamped = false;
-	int clamp_id = 0;
 
 	if (atomic_long_read(&cfs_rq->removed_load_avg)) {
 		s64 r = atomic_long_xchg(&cfs_rq->removed_load_avg, 0);
@@ -3525,7 +3516,7 @@ update_cfs_rq_load_avg(u64 now, struct cfs_rq *cfs_rq)
 	cfs_rq->load_last_update_time_copy = sa->last_update_time;
 #endif
 
-	if (decayed || removed_util || is_clamped)
+	if (decayed || removed_util)
 		cfs_rq_util_change(cfs_rq);
 
 	return decayed || removed_load;
@@ -4824,7 +4815,7 @@ static const u64 cfs_bandwidth_slack_period = 5 * NSEC_PER_MSEC;
 static int runtime_refresh_within(struct cfs_bandwidth *cfs_b, u64 min_expire)
 {
 	struct hrtimer *refresh_timer = &cfs_b->period_timer;
-	s64 remaining;
+	u64 remaining;
 
 	/* if the call-back is running a quota refresh is already occurring */
 	if (hrtimer_callback_running(refresh_timer))
@@ -4832,7 +4823,7 @@ static int runtime_refresh_within(struct cfs_bandwidth *cfs_b, u64 min_expire)
 
 	/* is a quota refresh about to occur? */
 	remaining = ktime_to_ns(hrtimer_expires_remaining(refresh_timer));
-	if (remaining < (s64)min_expire)
+	if (remaining < min_expire)
 		return 1;
 
 	return 0;
@@ -5335,7 +5326,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 	int task_new = !(flags & ENQUEUE_WAKEUP);
-	int is_idle = idle_cpu(cpu_of(rq));
 
 	/*
 	 * The code below (indirectly) updates schedutil which looks at
@@ -5405,12 +5395,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 	if (!se) {
 		add_nr_running(rq, 1);
-		/* if first is idle, some governors may not
-		 * update frequency, we must update again,
-		 * because idle_cpu return false until now.
-		 */
-		if (is_idle)
-			cfs_rq_util_change(&rq->cfs);
 #ifdef CONFIG_MTK_SCHED_RQAVG_US
 		inc_nr_heavy_running(2, p, 1, false);
 #endif
@@ -7357,7 +7341,6 @@ static inline int select_idle_smt(struct task_struct *p, struct sched_domain *sd
  */
 static int select_idle_cpu(struct task_struct *p, struct sched_domain *sd, int target)
 {
-	struct cpumask *cpus = this_cpu_cpumask_var_ptr(select_idle_mask);
 	struct sched_domain *this_sd;
 	u64 avg_cost, avg_idle;
 	u64 time, cost;
@@ -7388,11 +7371,11 @@ static int select_idle_cpu(struct task_struct *p, struct sched_domain *sd, int t
 
 	time = local_clock();
 
-	cpumask_and(cpus, sched_domain_span(sd), &p->cpus_allowed);
-
-	for_each_cpu_wrap(cpu, cpus, target) {
+	for_each_cpu_wrap(cpu, sched_domain_span(sd), target) {
 		if (!--nr)
 			return -1;
+		if (!cpumask_test_cpu(cpu, &p->cpus_allowed))
+			continue;
 		if (idle_cpu(cpu))
 			break;
 	}
@@ -9351,15 +9334,7 @@ static int detach_tasks(struct lb_env *env, struct rq_flags *rf)
 		if (!can_migrate_task(p, env))
 			goto next;
 
-		/*
-		 * Depending of the number of CPUs and tasks and the
-		 * cgroup hierarchy, task_h_load() can return a null
-		 * value. Make sure that env->imbalance decreases
-		 * otherwise detach_tasks() will stop only after
-		 * detaching up to loop_max tasks.
-		 */
-		load = max_t(unsigned long, task_h_load(p), 1);
-
+		load = task_h_load(p);
 
 		if (sched_feat(LB_MIN) && load < 16 && !env->sd->nr_balance_failed)
 			goto next;
@@ -10045,7 +10020,7 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 		}
 	}
 	/* Isolated CPU has no weight */
-	if (!group->group_weight || !group->sgc->capacity) {
+	if (!group->group_weight) {
 		sgs->group_capacity = 0;
 		sgs->avg_load = 0;
 		sgs->group_no_capacity = 1;
@@ -10637,10 +10612,6 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 
 	local = &sds.local_stat;
 	busiest = &sds.busiest_stat;
-
-	/* if cpu was isolated, then discard load balance*/
-	if (local->group_capacity == 0 || busiest->group_capacity == 0)
-		goto out_balanced;
 
 	/* ASYM feature bypasses nice load balance check */
 	if (check_asym_packing(env, &sds))
