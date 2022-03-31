@@ -54,8 +54,13 @@
 #define ARM64_MISMATCHED_CACHE_TYPE		26
 #define ARM64_SSBS				27
 #define ARM64_WORKAROUND_1188873		28
+#define ARM64_SPECTRE_BHB			29
 
+<<<<<<< HEAD
 >>>>>>> 9aeb4a5a73d3... arm64: arch_timer: Add workaround for ARM erratum 1188873
 #define ARM64_NCAPS				29
+=======
+#define ARM64_NCAPS				30
+>>>>>>> 0b1c660d8516... KVM: arm64: Add templates for BHB mitigation sequences
 
 #endif /* __ASM_CPUCAPS_H */
