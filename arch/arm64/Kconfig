@@ -464,6 +464,7 @@ config ARM64_ERRATUM_1024718
 
 	  If unsure, say Y.
 
+<<<<<<< HEAD
 config ARM64_ERRATUM_1542418
 	bool "Cortex-A77: 1542418: The core might fetch a stale instruction from the L0 Macro-op"
 	default n
@@ -473,6 +474,19 @@ config ARM64_ERRATUM_1542418
 	  Affected Cortex-A77 cores (r0p0, r1p0) could cause the core might
 	  fetch a stale instructions from the L0 Macro-op cache which violates
 	  the ordefing of instruction fetches.
+=======
+config ARM64_ERRATUM_1188873
+	bool "Cortex-A76: MRC read following MRRC read of specific Generic Timer in AArch32 might give incorrect result"
+	default y
+	help
+	  This option adds work arounds for ARM Cortex-A76 erratum 1188873
+
+	  Affected Cortex-A76 cores (r0p0, r1p0, r2p0) could cause
+	  register corruption when accessing the timer registers from
+	  AArch32 userspace.
+
+	  If unsure, say Y.
+>>>>>>> 9aeb4a5a73d3... arm64: arch_timer: Add workaround for ARM erratum 1188873
 
 config CAVIUM_ERRATUM_22375
 	bool "Cavium erratum 22375, 24313"
