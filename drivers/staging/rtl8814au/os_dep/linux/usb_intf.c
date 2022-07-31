@@ -1611,9 +1611,6 @@ static void rtw_dev_remove(struct usb_interface *pusb_intf)
 	return;
 
 }
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24))
-extern int console_suspend_enabled;
-#endif
 
 static int __init rtw_drv_entry(void)
 {
@@ -1679,3 +1676,4 @@ static void __exit rtw_drv_halt(void)
 
 module_init(rtw_drv_entry);
 module_exit(rtw_drv_halt);
+

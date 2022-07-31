@@ -1579,9 +1579,6 @@ static void rtw_dev_remove(struct usb_interface *pusb_intf)
 	return;
 
 }
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24))
-extern int console_suspend_enabled;
-#endif
 
 static int __init rtw_drv_entry(void)
 {
@@ -1656,3 +1653,4 @@ _adapter  *rtw_usb_get_sw_pointer(void)
 }
 EXPORT_SYMBOL(rtw_usb_get_sw_pointer);
 #endif /* CONFIG_INTEL_PROXIM */
+

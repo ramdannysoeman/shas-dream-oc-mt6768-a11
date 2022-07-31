@@ -1108,7 +1108,7 @@ alternative_else_nop_endif
 	 * This sequence must appear before the first indirect branch. i.e. the
 	 * ret out of tramp_ventry. It appears here because x30 is free.
 	 */
-	__mitigate_spectre_bhb_loop	x30
+	
 	.endif // \bhb == BHB_MITIGATION_LOOP
 
 	.if	\bhb == BHB_MITIGATION_INSN
@@ -1141,7 +1141,6 @@ alternative_insn isb, nop, ARM64_WORKAROUND_QCOM_FALKOR_E1003
 	 * i.e. the ret out of tramp_ventry. But it also needs the stack to be
 	 * mapped to save/restore the registers the SMC clobbers.
 	 */
-	__mitigate_spectre_bhb_fw
 	.endif // \bhb == BHB_MITIGATION_FW
 
 	add	x30, x30, #(1b - \vector_start + 4)
