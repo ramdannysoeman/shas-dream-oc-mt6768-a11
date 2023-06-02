@@ -475,7 +475,7 @@ static ssize_t udi_jtag_clock_proc_write(struct file *file,
 	memset(DR_byte, 0, sizeof(DR_byte));
 
 	/* input check format */
-	if (sscanf(buf, "%4s %u %u %512s %u %u %512s %u",
+	if (sscanf(buf, "%s %u %u %s %u %u %s %u",
 			&recv_key_word[0], &recv_buf[0],
 			&recv_buf[1], recv_char[0], &recv_buf[3],
 			&recv_buf[2], recv_char[1], &recv_buf[4]) == 8) {
